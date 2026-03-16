@@ -198,7 +198,7 @@
   <header>
     <div class="label">Model Training</div>
     <h1>ByT5 Model Train</h1>
-    <p>Epochs 1–89 &nbsp;·&nbsp; Full validation every 2 epochs &nbsp;·&nbsp; Epoch 83 highlighted</p>
+    <p>Epochs 1–96 &nbsp;·&nbsp; Full validation every 2 epochs &nbsp;·&nbsp; Early stopping at epoch 96 &nbsp;·&nbsp; Epoch 83 highlighted</p>
   </header>
 
   <!-- Main chart with toggles -->
@@ -244,7 +244,7 @@
     </div>
   </div>
 
-  <footer>BYT5 MODEL TRAIN &nbsp;·&nbsp; EPOCHS 1–89 &nbsp;·&nbsp; ALL METRICS PARSED FROM RAW LOG</footer>
+  <footer>BYT5 MODEL TRAIN &nbsp;·&nbsp; EPOCHS 1–96 &nbsp;·&nbsp; EARLY STOPPING @ EPOCH 96 &nbsp;·&nbsp; ALL METRICS PARSED FROM RAW LOG</footer>
 </div>
 
 <script>
@@ -337,7 +337,14 @@ const raw = [
   {e:86, tl:0.3119, vl:0.5968, vm:40.0012, bl:31.6382, cf:50.5749, lr:1.33e-4},
   {e:87, tl:0.3079, vl:0.5953, vm:40.6618, bl:32.4079, cf:51.0178, lr:1.31e-4},
   {e:88, tl:0.3032, vl:0.5938, vm:40.9815, bl:32.7611, cf:51.2646, lr:1.30e-4},
-  {e:89, tl:0.2979, vl:null, vm:null, bl:null, cf:null, lr:1.28e-4},
+  {e:89, tl:0.3007, vl:0.5946, vm:40.3882, bl:32.1250, cf:50.7768, lr:1.28e-4},
+  {e:90, tl:0.2952, vl:0.5988, vm:40.7137, bl:32.5118, cf:50.9846, lr:1.26e-4},
+  {e:91, tl:0.2892, vl:0.5979, vm:41.4727, bl:33.4341, cf:51.4439, lr:1.25e-4},
+  {e:92, tl:0.2852, vl:0.5986, vm:40.5792, bl:32.4663, cf:50.7193, lr:1.23e-4},
+  {e:93, tl:0.2816, vl:0.6032, vm:40.7649, bl:32.4172, cf:51.2623, lr:1.22e-4},
+  {e:94, tl:0.2773, vl:0.6046, vm:40.3502, bl:32.0447, cf:50.8083, lr:1.20e-4},
+  {e:95, tl:0.2740, vl:0.5994, vm:40.7353, bl:32.4150, cf:51.1914, lr:1.18e-4},
+  {e:96, tl:0.2707, vl:0.6001, vm:40.6611, bl:32.3662, cf:51.0817, lr:1.17e-4},
 ];
 
 const epochs = raw.map(r => r.e);
@@ -351,30 +358,51 @@ const COLORS = {
   chrF:       '#ff3e6c',
 };
 
-// Epoch-83 vertical line plugin
+// Epoch-83 vertical line + early stopping plugin
 const epoch83Plugin = {
   id: 'epoch83Line',
   afterDraw(chart) {
-    const idx = E83_IDX;
-    if (idx < 0) return;
+    const idx83 = E83_IDX;
+    const idx96 = raw.findIndex(r => r.e === 96);
     const meta = chart.getDatasetMeta(0);
-    if (!meta.data[idx]) return;
-    const x = meta.data[idx].x;
     const {top, bottom} = chart.chartArea;
     const ctx = chart.ctx;
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,62,108,0.7)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(x, top);
-    ctx.lineTo(x, bottom);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = '#ff3e6c';
-    ctx.font = 'bold 10px JetBrains Mono, monospace';
-    ctx.fillText('E83', x + 4, top + 14);
-    ctx.restore();
+
+    // Epoch 83 line
+    if (idx83 >= 0 && meta.data[idx83]) {
+      const x = meta.data[idx83].x;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,62,108,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#ff3e6c';
+      ctx.font = 'bold 10px JetBrains Mono, monospace';
+      ctx.fillText('E83', x + 4, top + 14);
+      ctx.restore();
+    }
+
+    // Early stopping line at epoch 96
+    if (idx96 >= 0 && meta.data[idx96]) {
+      const x = meta.data[idx96].x;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(250,204,21,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 10px JetBrains Mono, monospace';
+      ctx.fillText('STOP', x - 34, top + 14);
+      ctx.restore();
+    }
   }
 };
 
